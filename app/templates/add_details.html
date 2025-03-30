@@ -13,13 +13,13 @@
         }
 
         body {
-            background-color: #1e3a8a; /* Dark blue background */
+            background-color: #1e3a8a;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start; /* Align content to the top */
-            height: 100vh;
-            padding-top: 20px; /* Space from the top */
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding-top: 20px;
         }
 
         .nav {
@@ -27,7 +27,11 @@
             background: black;
             padding: 10px;
             display: flex;
-            justify-content: flex-end; /* Align items to the right */
+            justify-content: flex-end;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
         }
 
         .nav a {
@@ -35,108 +39,141 @@
             text-decoration: none;
             margin: 0 15px;
             font-size: 16px;
+            transition: color 0.3s;
+        }
+
+        .nav a:hover {
+            color: #4ade80;
         }
 
         .container {
             width: 90%;
-            max-width: 400px;
+            max-width: 450px;
             background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            margin-top: 20px; /* Push form down slightly */
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            margin-top: 70px;
+            margin-bottom: 30px;
         }
 
         h2 {
             text-align: center;
-            margin-bottom: 20px;
-            color: #333;
+            margin-bottom: 25px;
+            color: #1e3a8a;
+            font-size: 24px;
         }
 
         .form-group {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .form-group label {
-            font-weight: bold;
-            margin-bottom: 5px;
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
         }
 
         .form-group input,
         .form-group select {
             width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #1e3a8a;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.2);
         }
 
         .btn {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             background-color: #1e3a8a;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s, transform 0.2s;
         }
 
         .btn:hover {
-            background-color: #162c6e;
+            background-color: #172b63;
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px 15px;
+            }
+            
+            h2 {
+                font-size: 20px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div class="nav">
-        <a href="/dashboard">Dashboard</a>
-        <a href="/logout">Logout</a>
-    </div>
+    <nav class="nav">
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </nav>
 
     <div class="container">
         <h2>Add Emergency Details</h2>
-        <form action="/submit_details" method="POST">
+        <form action="{{ url_for('add_details') }}" method="POST">
             <div class="form-group">
-                <label for="full_name">Full Name:</label>
-                <input type="text" id="full_name" name="full_name" required>
+                <label for="name">Full Name:</label>
+                <input type="text" id="name" name="name" required placeholder="Enter your full name">
             </div>
 
             <div class="form-group">
-                <label for="contact">Emergency Contact Number:</label>
-                <input type="text" id="contact" name="contact" required>
+                <label for="emergency_contact">Emergency Contact Number:</label>
+                <input type="tel" id="emergency_contact" name="emergency_contact" required placeholder="Enter phone number">
             </div>
 
             <div class="form-group">
-                <label for="vehicle">Vehicle Number:</label>
-                <input type="text" id="vehicle" name="vehicle" required>
+                <label for="vehicle_number">Vehicle Number:</label>
+                <input type="text" id="vehicle_number" name="vehicle_number" required placeholder="Enter vehicle registration">
             </div>
 
             <div class="form-group">
                 <label for="blood_group">Blood Group (Optional):</label>
-                <input type="text" id="blood_group" name="blood_group">
+                <input type="text" id="blood_group" name="blood_group" placeholder="e.g., O+">
             </div>
 
             <div class="form-group">
                 <label for="allergies">Do you have allergies?</label>
                 <select id="allergies" name="allergies">
-                    <option value="No">No</option>
+                    <option value="No" selected>No</option>
                     <option value="Yes">Yes</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="disabled">Are you differently-abled?</label>
-                <select id="disabled" name="disabled">
-                    <option value="No">No</option>
+                <label for="differently_abled">Are you differently-abled?</label>
+                <select id="differently_abled" name="differently_abled">
+                    <option value="No" selected>No</option>
                     <option value="Yes">Yes</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="alt_contact">Alternate Emergency Contact (Optional):</label>
-                <input type="text" id="alt_contact" name="alt_contact">
+                <label for="alternate_contact">Alternate Emergency Contact (Optional):</label>
+                <input type="tel" id="alternate_contact" name="alternate_contact" placeholder="Alternate phone number">
             </div>
 
             <button type="submit" class="btn">Save Details</button>
