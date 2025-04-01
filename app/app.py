@@ -83,12 +83,16 @@ def register():
             flash('Username already exists! Please choose another.', 'danger')
             return redirect(url_for('register'))
 
-        # Create new user
-        new_user = User(username=username, password=hashed_password)
-        db.session.add(new_user)
-        db.session.commit()
-
-        flash('Account created successfully! Please log in.', 'success')
+        try:
+            # Create new user
+            new_user = User(username=username, password=hashed_password)
+            db.session.add(new_user)
+            db.session.commit()
+            flash('Account created successfully! Please log in.', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error creating account: {e}', 'danger')
+            return redirect(url_for('register'))
         return redirect(url_for('login'))
 
     return render_template('register.html')
@@ -122,29 +126,33 @@ def dashboard():
 @login_required
 def add_details():
     if request.method == 'POST':
-        print("Form Data Received:", request.form)  # Debug: Print form data
-        uid = generate_uid()
-        details = Details(
-            uid=uid,
-            name=request.form['name'],
-            emergency_contact=request.form['emergency_contact'],
-            vehicle_number=request.form['vehicle_number'],
-            blood_group=request.form.get('blood_group'),
-            allergies=request.form.get('allergies'),
-            differently_abled=request.form.get('differently_abled'),
-            alternate_contact=request.form.get('alternate_contact'),
-            user_id=current_user.id
-        )
-        db.session.add(details)
-        db.session.commit()
+        try:
+            uid = generate_uid()
+            details = Details(
+                uid=uid,
+                name=request.form['name'],
+                emergency_contact=request.form['emergency_contact'],
+                vehicle_number=request.form['vehicle_number'],
+                blood_group=request.form.get('blood_group'),
+                allergies=request.form.get('allergies'),
+                differently_abled=request.form.get('differently_abled'),
+                alternate_contact=request.form.get('alternate_contact'),
+                user_id=current_user.id
+            )
+            db.session.add(details)
+            db.session.commit()
 
-        # Generate Aztec code
-        aztec_code_path = generate_aztec_code(uid)
-        details.aztec_code_path = aztec_code_path
-        db.session.commit()
+            # Generate Aztec code
+            aztec_code_path = generate_aztec_code(uid)
+            details.aztec_code_path = aztec_code_path
+            db.session.commit()
 
-        flash('Details added successfully! Aztec code generated.', 'success')
-        return redirect(url_for('dashboard'))
+            flash('Details added successfully! Aztec code generated.', 'success')
+            return redirect(url_for('dashboard'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error adding details: {e}', 'danger')
+            return redirect(url_for('add_details'))
 
     return render_template('add_details.html')
 
@@ -202,4 +210,4 @@ if __name__ == '__main__':
             print("Database tables created successfully!")
         except Exception as e:
             print(f"Error creating database tables: {e}")
-    app.run(debug=True)      
+    app.run(debug=True)
