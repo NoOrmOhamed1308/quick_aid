@@ -55,7 +55,7 @@ def generate_uid():
 def generate_aztec_code(uid):
     """Generate an Aztec code for the given UID and save it as an image."""
     # Replace '127.0.0.1:5000' with your actual domain or localhost
-    url = f"http://127.0.0.1:5000/details/{uid}"  # URL to display details
+    url = f"https://quick-aid.onrender.com{uid}"  # URL to display details
     aztec = segno.make_qr(url)  # Generate Aztec code with the URL
     aztec_code_path = f"static/aztec_codes/{uid}.png"
     os.makedirs(os.path.dirname(aztec_code_path), exist_ok=True)  # Ensure directory exists
