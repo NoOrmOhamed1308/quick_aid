@@ -71,6 +71,15 @@ def dashboard():
 def about():
     return render_template('about.html')
 
+@app.route('/add_details', methods=['GET', 'POST'])
+@login_required  # Ensure only logged-in users can access
+def add_details():
+    if request.method == 'POST':
+        # Process form submission here
+        # Example: Save data to database
+        return redirect(url_for('dashboard'))  # Redirect to dashboard after adding details
+    return render_template('add_details.html')
+
 @app.route('/logout')
 @login_required
 def logout():
