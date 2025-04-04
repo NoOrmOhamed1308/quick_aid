@@ -8,7 +8,7 @@
         text-align: center;
     }
     .hero {
-        background-color: #1a3360; /* Darker shade similar to the background */
+        background-color: #1a3360;
         padding: 50px 20px;
         border-radius: 10px;
         max-width: 800px;
@@ -36,18 +36,11 @@
     .cta-button:hover {
         background-color: #ffdb4d;
     }
-    .qr-section {
-        margin-top: 30px;
-        padding: 20px;
-    }
 </style>
 
 <div class="hero">
     <h1>Welcome to QUICK AID</h1>
-    <p>Make sure to your family that you are reachable from anywhere in the world even if you can't.</p>
+    <p>Ensure your loved ones can reach you anytime, anywhere, even when you can't.</p>
     <a href="{{ url_for('register') }}" class="cta-button">Get Started</a>
-</div>
-
-<div class="qr-section">
 </div>
 {% endblock %}

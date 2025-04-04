@@ -52,6 +52,10 @@ def dashboard():
     details = Details.query.filter_by(user_id=current_user.id).all()
     return render_template('dashboard.html', details=details)
 
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
 @app.route('/logout')
 @login_required
 def logout():
