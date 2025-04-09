@@ -2,8 +2,8 @@ from flask import Flask, render_template, redirect, url_for, flash, request
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from app import app, db
 from app.models import User, Details
-from utils import generate_uid
-from utils import generate_aztec_code
+from app.utils import generate_uid
+from app.utils import generate_aztec_code
 from werkzeug.security import generate_password_hash, check_password_hash
 import segno
 import os
