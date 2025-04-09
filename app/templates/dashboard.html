@@ -2,66 +2,102 @@
 {% block content %}
 <style>
     body {
-        background-color: #1e3c72;
-        color: white;
+        background-color: #1a3b6f; /* Dark blue background */
+        margin: 0;
+        padding: 0;
         font-family: Arial, sans-serif;
     }
+
     .dashboard-container {
-        width: 90%;
-        margin: auto;
+        padding: 30px;
+        color: white;
         text-align: center;
     }
+
     h1 {
+        font-size: 28px;
+        font-weight: bold;
         margin-bottom: 20px;
     }
+
     .cta-button {
         display: inline-block;
         padding: 10px 20px;
-        margin-bottom: 20px;
-        background-color: #ffcc00;
+        background-color: #ffd700; /* Yellow button */
         color: black;
         text-decoration: none;
-        border-radius: 5px;
+        border-radius: 6px;
+        font-weight: bold;
+        margin-bottom: 25px;
     }
-    .cta-button:hover {
-        background-color: #ffdb4d;
-    }
+
     table {
         width: 100%;
         border-collapse: collapse;
-        background: white;
-        color: black;
-        border-radius: 5px;
+        background-color: white;
+        border-radius: 8px;
         overflow: hidden;
     }
+
     th, td {
-        padding: 10px;
+        padding: 12px;
+        text-align: center;
         border: 1px solid #ddd;
-        text-align: left;
+        color: black;
     }
+
     th {
-        background-color: #1b2b55;
+        background-color: #1a3b6f;
         color: white;
     }
-    img {
-        width: 100px;
-        height: 100px;
+
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
     }
+
+    .aztec-code-container {
+    width: 100px;
+    height: 100px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    border: 1px solid #ddd;
+    box-sizing: border-box;
+}
+
+.aztec-code-img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+}
+
+
+    .aztec-code-error {
+        color: #ff4444;
+        font-size: 12px;
+    }
+
     .action-links {
         display: flex;
         flex-direction: column;
-        gap: 5px;
+        gap: 8px;
     }
+
     .edit-link, .download-link {
         display: inline-block;
-        padding: 5px 10px;
-        background-color: #007bff;
+        padding: 6px 12px;
+        background-color: #008CFF;
         color: white;
         text-decoration: none;
-        border-radius: 3px;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: bold;
     }
+
     .edit-link:hover, .download-link:hover {
-        background-color: #0056b3;
+        background-color: #0066cc;
     }
 </style>
 
@@ -96,15 +132,20 @@
                 <td>{{ detail.differently_abled }}</td>
                 <td>{{ detail.alternate_contact }}</td>
                 <td>{{ detail.uid }}</td>
-                <td><img src="{{ url_for('static', filename='aztec_codes/' + detail.uid + '_aztec.png') }}" alt="Aztec Code">
-
+                <td>
+                    <div class="aztec-code-container">
+                        <img class="aztec-code-img"
+                             src="{{ url_for('static', filename='aztec_codes/' + detail.uid + '_aztec.png') }}"
+                             alt="Aztec Code"
+                             onerror="this.onerror=null;this.parentNode.innerHTML='<span class=aztec-code-error>Code missing</span>'">
+                    </div>
                 </td>
                 <td>
                     <div class="action-links">
                         <a href="{{ url_for('edit_details', uid=detail.uid) }}" class="edit-link">Edit</a>
-                        <a href="{{ url_for('static', filename='aztec_codes/' + detail.uid + '_aztec.png') }}" download="Aztec_Code_{{ detail.uid }}.png" class="download-link">Download</a>
-
-
+                        <a href="{{ url_for('static', filename='aztec_codes/' + detail.uid + '_aztec.png') }}" 
+                           download="AztecCode_{{ detail.uid }}.png" 
+                           class="download-link">Download</a>
                     </div>
                 </td>
             </tr>
@@ -112,7 +153,7 @@
         </tbody>
     </table>
     {% else %}
-    <p>No details found. Add new details to get started.</p>
+    <p style="color:white;">No details found. Add new details to get started.</p>
     {% endif %}
 </div>
 {% endblock %}

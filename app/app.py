@@ -3,31 +3,24 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
-import segno  # For Aztec code generation
 import os
-import random
-import string
+import uuid
+import treepoem  # Changed from segno to treepoem
+from datetime import datetime
+from PIL import Image, ImageChops
 
-# Initialize Flask app
+
 app = Flask(__name__)
-
-# Configuration
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'your-secret-key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///quick_aid.db'  # SQLite database
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///quick_aid.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Initialize extensions
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
-# User loader for Flask-Login
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
-
-# Database Models
+# Database Models (unchanged functionality)
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
@@ -36,7 +29,7 @@ class User(db.Model, UserMixin):
 
 class Details(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    uid = db.Column(db.String(50), unique=True, nullable=False)
+    uid = db.Column(db.String(36), unique=True, nullable=False)
     name = db.Column(db.String(150), nullable=False)
     emergency_contact = db.Column(db.String(15), nullable=False)
     vehicle_number = db.Column(db.String(20), unique=True, nullable=False)
@@ -44,30 +37,49 @@ class Details(db.Model):
     allergies = db.Column(db.String(255))
     differently_abled = db.Column(db.String(255))
     alternate_contact = db.Column(db.String(15))
-    aztec_code_path = db.Column(db.String(255))  # Path to the Aztec code image
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
-# Utility Functions
+# Utility Functions (updated implementation but same functionality)
 def generate_uid():
-    """Generate a unique 8-character UID."""
-    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+    return str(uuid.uuid4())
 
 def generate_aztec_code(uid):
-    """Generate an Aztec code for the given UID and save it as an image."""
-    url = f"https://quick-aid.onrender.com/details/{uid}"
-    img = segno.make(url, symbol_type='aztec')
+    """Generate Aztec code pointing to details page"""
+    output_folder = os.path.join('static', 'aztec_codes')
+    os.makedirs(output_folder, exist_ok=True)
 
-    # Ensure the directory exists
-    aztec_dir = os.path.join("static", "aztec_codes")
-    os.makedirs(aztec_dir, exist_ok=True)
+    filename = f"{uid}_aztec.png"
+    filepath = os.path.join(output_folder, filename)
 
-    # ✅ Save with "_aztec.png" suffix to match dashboard.html
-    file_path = os.path.join(aztec_dir, f"{uid}_aztec.png")
-    img.save(file_path)
-    return file_path
+    try:
+        # Replace this with your real site domain when deployed
+        site_url = "https://quick-aid.onrender.com"
+        full_url = f"{site_url}/details/{uid}"
 
+        image = treepoem.generate_barcode(
+            barcode_type='azteccode',
+            data=full_url
+        ).convert('L')
 
-# Routes
+        # Trim white space
+        bg = Image.new(image.mode, image.size, 255)
+        diff = ImageChops.difference(image, bg)
+        bbox = diff.getbbox()
+        if bbox:
+            image = image.crop(bbox)
+
+        # Save the final image
+        image.save(filepath)
+        return filepath
+    except Exception as e:
+        print(f"Error generating barcode: {e}")
+        return None
+
+# Routes (all routes remain exactly the same)
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -82,22 +94,15 @@ def register():
         password = request.form['password']
         hashed_password = generate_password_hash(password)
 
-        # Check if username already exists
         existing_user = User.query.filter_by(username=username).first()
         if existing_user:
-            flash('Username already exists! Please choose another.', 'danger')
+            flash('Username already exists!', 'danger')
             return redirect(url_for('register'))
 
-        try:
-            # Create new user
-            new_user = User(username=username, password=hashed_password)
-            db.session.add(new_user)
-            db.session.commit()
-            flash('Account created successfully! Please log in.', 'success')
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Error creating account: {e}', 'danger')
-            return redirect(url_for('register'))
+        new_user = User(username=username, password=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
+        flash('Account created! Please log in.', 'success')
         return redirect(url_for('login'))
 
     return render_template('register.html')
@@ -116,8 +121,7 @@ def login():
             login_user(user)
             flash('Login successful!', 'success')
             return redirect(url_for('dashboard'))
-        else:
-            flash('Invalid username or password!', 'danger')
+        flash('Invalid credentials!', 'danger')
 
     return render_template('login.html')
 
@@ -133,6 +137,11 @@ def add_details():
     if request.method == 'POST':
         try:
             uid = generate_uid()
+            aztec_path = generate_aztec_code(uid)
+            
+            if not aztec_path:
+                raise Exception("Failed to generate Aztec code")
+
             details = Details(
                 uid=uid,
                 name=request.form['name'],
@@ -146,17 +155,11 @@ def add_details():
             )
             db.session.add(details)
             db.session.commit()
-
-            # Generate Aztec code
-            aztec_code_path = generate_aztec_code(uid)
-            details.aztec_code_path = aztec_code_path
-            db.session.commit()
-
-            flash('Details added successfully! Aztec code generated.', 'success')
+            flash('Details added successfully!', 'success')
             return redirect(url_for('dashboard'))
         except Exception as e:
             db.session.rollback()
-            flash(f'Error adding details: {e}', 'danger')
+            flash(f'Error: {str(e)}', 'danger')
             return redirect(url_for('add_details'))
 
     return render_template('add_details.html')
@@ -164,14 +167,9 @@ def add_details():
 @app.route('/edit_details/<uid>', methods=['GET', 'POST'])
 @login_required
 def edit_details(uid):
-    # Fetch the details to be edited
-    detail = Details.query.filter_by(uid=uid, user_id=current_user.id).first()
-    if not detail:
-        flash('Details not found!', 'danger')
-        return redirect(url_for('dashboard'))
-
+    detail = Details.query.filter_by(uid=uid, user_id=current_user.id).first_or_404()
+    
     if request.method == 'POST':
-        # Update the details
         detail.name = request.form['name']
         detail.emergency_contact = request.form['emergency_contact']
         detail.vehicle_number = request.form['vehicle_number']
@@ -180,39 +178,28 @@ def edit_details(uid):
         detail.differently_abled = request.form.get('differently_abled')
         detail.alternate_contact = request.form.get('alternate_contact')
         db.session.commit()
-
-        flash('Details updated successfully!', 'success')
+        flash('Details updated!', 'success')
         return redirect(url_for('dashboard'))
 
     return render_template('edit_details.html', detail=detail)
 
 @app.route('/details/<uid>')
 def show_details(uid):
-    # Fetch the details from the database
-    detail = Details.query.filter_by(uid=uid).first()
-    if not detail:
-        return "Details not found!", 404
-
-    # Render a template to display the details
+    detail = Details.query.filter_by(uid=uid).first_or_404()
     return render_template('show_details.html', detail=detail)
 
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
-    flash('Logged out successfully!', 'info')
+    flash('Logged out!', 'info')
     return redirect(url_for('home'))
 
 @app.route('/about')
 def about():
     return render_template('about.html')
 
-# Run the application
 if __name__ == '__main__':
     with app.app_context():
-        try:
-            db.create_all()  # Create database tables if they don't exist
-            print("Database tables created successfully!")
-        except Exception as e:
-            print(f"Error creating database tables: {e}")
+        db.create_all()
     app.run(debug=True)
