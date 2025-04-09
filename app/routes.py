@@ -109,7 +109,7 @@ def add_details():
 
     return render_template('add_details.html')
 
-@app.route('/edit_details/<int:uid>', methods=['GET', 'POST'])
+@app.route('/edit_details/<uuid:uid>', methods=['GET', 'POST'])
 @login_required
 def edit_details(uid):
     detail = Details.query.get(uid)
