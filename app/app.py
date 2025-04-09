@@ -7,7 +7,7 @@ import segno  # For Aztec code generation
 import os
 import random
 import string
-
+import segno
 # Initialize Flask app
 app = Flask(__name__)
 
