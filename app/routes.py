@@ -109,6 +109,22 @@ def add_details():
 
     return render_template('add_details.html')
 
+@app.route('/edit_details/<int:uid>', methods=['GET', 'POST'])
+@login_required
+def edit_details(uid):
+    detail = Details.query.get(uid)
+    if not detail:
+        flash("Detail not found", "danger")
+        return redirect(url_for("dashboard"))
+
+    if request.method == 'POST':
+        # process form data and update
+        pass
+
+    return render_template("edit_details.html", detail=detail)
+
+
+
 
 @app.route('/logout')
 @login_required
