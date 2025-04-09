@@ -13,7 +13,7 @@ def generate_aztec_code(data):
     filename = f"{data}_aztec.png"
     filepath = os.path.join(output_folder, filename)
 
-    aztec = segno.make(data, symbol_type='aztec')  # ✅ FIXED: replaced `aztec=True` with `symbol_type='aztec'`
+    aztec = segno.helpers.make_aztec(data)  # ✅ Use helper for Aztec
     aztec.save(filepath, scale=5)
 
     return filepath
