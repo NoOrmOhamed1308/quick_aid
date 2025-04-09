@@ -1,7 +1,6 @@
-# utils.py
 import uuid
-import segno
 import os
+import treepoem  # not segno!
 
 def generate_uid():
     return str(uuid.uuid4())
@@ -13,8 +12,12 @@ def generate_aztec_code(data):
     filename = f"{data}_aztec.png"
     filepath = os.path.join(output_folder, filename)
 
-    # ✅ Correct way to generate Aztec code using latest AND older segno
-    aztec = segno.make(data)  # no keyword arguments
-    aztec.save(filepath, kind='aztec', scale=5)  # ✅ Specify kind here
+    # treepoem generates Aztec code
+    image = treepoem.generate_barcode(
+        barcode_type='azteccode',
+        data=data
+    )
+
+    image.convert("1").save(filepath)
 
     return filepath
