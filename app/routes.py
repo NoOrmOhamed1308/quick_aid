@@ -72,13 +72,40 @@ def about():
     return render_template('about.html')
 
 @app.route('/add_details', methods=['GET', 'POST'])
-@login_required  # Ensure only logged-in users can access
+@login_required
 def add_details():
     if request.method == 'POST':
-        # Process form submission here
-        # Example: Save data to database
-        return redirect(url_for('dashboard'))  # Redirect to dashboard after adding details
+        try:
+            uid = generate_uid()
+            details = Details(
+                uid=uid,
+                name=request.form['name'],
+                emergency_contact=request.form['emergency_contact'],
+                vehicle_number=request.form['vehicle_number'],
+                blood_group=request.form.get('blood_group'),
+                allergies=request.form.get('allergies'),
+                differently_abled=request.form.get('differently_abled'),
+                alternate_contact=request.form.get('alternate_contact'),
+                user_id=current_user.id
+            )
+            db.session.add(details)
+            db.session.commit()
+
+            # Generate Aztec code
+            aztec_code_path = generate_aztec_code(uid)
+            details.aztec_code_path = aztec_code_path
+            db.session.commit()
+
+            flash('Details added successfully! Aztec code generated.', 'success')
+            return redirect(url_for('dashboard'))
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error adding details: {e}', 'danger')
+            return redirect(url_for('add_details'))
+
     return render_template('add_details.html')
+
 
 @app.route('/logout')
 @login_required
