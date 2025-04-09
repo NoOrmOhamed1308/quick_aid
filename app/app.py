@@ -54,12 +54,18 @@ def generate_uid():
 
 def generate_aztec_code(uid):
     """Generate an Aztec code for the given UID and save it as an image."""
-    url = f"https://quick-aid.onrender.com/details/{uid}"  # Fixed path
-    img = segno.make(url, symbol_type='aztec')  # ✅ FIXED HERE
-    aztec_code_path = f"static/aztec_codes/{uid}.png"
-    os.makedirs(os.path.dirname(aztec_code_path), exist_ok=True)
-    img.save(aztec_code_path)
-    return aztec_code_path
+    url = f"https://quick-aid.onrender.com/details/{uid}"
+    img = segno.make(url, symbol_type='aztec')
+
+    # Ensure the directory exists
+    aztec_dir = os.path.join("static", "aztec_codes")
+    os.makedirs(aztec_dir, exist_ok=True)
+
+    # ✅ Save with "_aztec.png" suffix to match dashboard.html
+    file_path = os.path.join(aztec_dir, f"{uid}_aztec.png")
+    img.save(file_path)
+    return file_path
+
 
 # Routes
 @app.route('/')

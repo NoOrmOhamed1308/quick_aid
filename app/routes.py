@@ -94,11 +94,6 @@ def add_details():
             db.session.add(details)
             db.session.commit()
 
-            # Generate Aztec code
-            aztec_code_path = generate_aztec_code(uid)
-            details.aztec_code_path = aztec_code_path
-            db.session.commit()
-
             flash('Details added successfully! Aztec code generated.', 'success')
             return redirect(url_for('dashboard'))
 
