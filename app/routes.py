@@ -10,6 +10,7 @@ import os
 import random
 import string
 
+
 # Login Manager
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
