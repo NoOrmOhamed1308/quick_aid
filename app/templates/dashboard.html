@@ -135,17 +135,17 @@
                 <td>
                     <div class="aztec-code-container">
                         <img class="aztec-code-img"
-                             src="{{ url_for('static', filename='aztec_codes/' + detail.uid + '_aztec.png') }}"
-                             alt="Aztec Code"
-                             onerror="this.onerror=null;this.parentNode.innerHTML='<span class=aztec-code-error>Code missing</span>'">
+                        src="{{ url_for('serve_aztec_code', uid=detail.uid) }}"
+                        alt="Aztec Code"
+                        onerror="this.onerror=null;this.parentNode.innerHTML='<span class=aztec-code-error>Code missing</span>'">                   
                     </div>
                 </td>
                 <td>
                     <div class="action-links">
                         <a href="{{ url_for('edit_details', uid=detail.uid) }}" class="edit-link">Edit</a>
-                        <a href="{{ url_for('static', filename='aztec_codes/' + detail.uid + '_aztec.png') }}" 
-                           download="AztecCode_{{ detail.uid }}.png" 
-                           class="download-link">Download</a>
+                        <a href="{{ url_for('serve_aztec_code', uid=detail.uid) }}"
+                        download="AztecCode_{{ detail.uid }}.png"
+                        class="download-link">Download</a>                     
                     </div>
                 </td>
             </tr>

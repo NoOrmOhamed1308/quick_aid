@@ -45,7 +45,7 @@ def generate_uid():
 
 def generate_aztec_code(uid):
     """Generate Aztec code pointing to details page"""
-    output_folder = os.path.join('static', 'aztec_codes')
+    output_folder = '/tmp/aztec_codes' 
     os.makedirs(output_folder, exist_ok=True)
 
     filename = f"{uid}_aztec.png"
@@ -198,6 +198,16 @@ def logout():
 @app.route('/about')
 def about():
     return render_template('about.html')
+
+from flask import send_file
+
+@app.route('/aztec/<uid>')
+def serve_aztec_code(uid):
+    path = f"/tmp/aztec_codes/{uid}_aztec.png"
+    if os.path.exists(path):
+        return send_file(path, mimetype='image/png')
+    else:
+        return "Aztec code not found", 404
 
 if __name__ == '__main__':
     with app.app_context():
