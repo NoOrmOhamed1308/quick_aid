@@ -5,6 +5,7 @@ from app.models import User, Details
 from app.utils import generate_uid
 from app.utils import generate_aztec_code
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask import send_file
 import segno
 import os
 import random
@@ -118,6 +119,13 @@ def edit_details(uid):
 
     return render_template("edit_details.html", detail=detail)
 
+@app.route('/aztec/<uid>')
+def serve_aztec_code(uid):
+    path = f"/tmp/aztec_codes/{uid}_aztec.png"
+    if os.path.exists(path):
+        return send_file(path, mimetype='image/png')
+    else:
+        return "Aztec code not found", 404
 
 
 
