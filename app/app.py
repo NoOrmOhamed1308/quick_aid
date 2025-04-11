@@ -7,6 +7,7 @@ import os
 import uuid
 import treepoem  # Changed from segno to treepoem
 from datetime import datetime
+from flask import send_file
 from PIL import Image, ImageChops
 
 
@@ -199,7 +200,6 @@ def logout():
 def about():
     return render_template('about.html')
 
-from flask import send_file
 
 @app.route('/aztec/<uid>')
 def serve_aztec_code(uid):
